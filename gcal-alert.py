@@ -1,6 +1,7 @@
 import datetime
 import os
 import pickle
+import re
 import sys
 from dateutil.parser import isoparse
 from dateutil import tz
@@ -32,6 +33,14 @@ def authenticate_google_calendar():
 
     return build('calendar', 'v3', credentials=creds)
 
+def extract_zoom_link(description):
+    # Basic pattern to match Zoom links
+    zoom_pattern = r"https://[^\s]*zoom\.us/[^\s]*"
+    match = re.search(zoom_pattern, description)
+    if match:
+        return match.group(0)
+    return None
+
 def check_for_events(service):
     now = datetime.datetime.now(tz.UTC).isoformat()  # Use timezone-aware datetime
     calendar_id = 'primary'  # Change this to the ID of the calendar you want to check
@@ -47,11 +56,11 @@ def check_for_events(service):
     for event in events:
         start = event['start'].get('dateTime', event['start'].get('date'))
         event_name = event.get('summary', 'No Title')
-        print(f"Event: {event_name}, Raw start time: {start}")  # Debugging line
+        description = event.get('description', '')
+        location = event.get('location', '')
 
         # Skip all-day events
         if 'date' in event['start']:
-            print(f"Skipping all-day event: {event_name}")
             continue
 
         try:
@@ -60,10 +69,16 @@ def check_for_events(service):
             print(f"Invalid isoformat string: {start}")
             continue
 
-        print(f"Parsed start time: {start_time}, Current time: {datetime.datetime.now(tz.UTC)}")  # Debugging line
 
         if start_time <= datetime.datetime.now(tz.UTC) < start_time + datetime.timedelta(minutes=1):
-            os.system(f'say \"{event_name}\"')
+            print(f"Parsed start time: {start_time}, Current time: {datetime.datetime.now(tz.UTC)}")  # Debugging line
+            zoom_link = extract_zoom_link(description) or extract_zoom_link(location)
+            if zoom_link:
+                print(f"Zoom link: {zoom_link}")
+                notification_message = f'{event_name}\n{zoom_link}'
+                os.system(f'osascript -e \'display notification "{notification_message}" with title "Event Alert"\'')
+            else:
+                os.system(f'say \"{event_name}\"')
 
 def main():
     service = authenticate_google_calendar()
