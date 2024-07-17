@@ -5,7 +5,7 @@ import re
 import sys
 from dateutil.parser import isoparse
 from dateutil import tz
-
+from bs4 import BeautifulSoup
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -33,10 +33,10 @@ def authenticate_google_calendar():
 
     return build('calendar', 'v3', credentials=creds)
 
-def extract_zoom_link(description):
+def extract_zoom_link(text):
     # Basic pattern to match Zoom links
-    zoom_pattern = r"https://[^\s]*zoom\.us/[^\s]*"
-    match = re.search(zoom_pattern, description)
+    zoom_pattern = r"https://[\w.-]+\.zoom\.us/[^\s]+"
+    match = re.search(zoom_pattern, text)
     if match:
         return match.group(0)
     return None
@@ -59,9 +59,12 @@ def check_for_events(service):
         description = event.get('description', '')
         location = event.get('location', '')
 
+
         # Skip all-day events
         if 'date' in event['start']:
             continue
+
+
 
         try:
             start_time = isoparse(start)
@@ -69,8 +72,15 @@ def check_for_events(service):
             print(f"Invalid isoformat string: {start}")
             continue
 
-
         if start_time <= datetime.datetime.now(tz.UTC) < start_time + datetime.timedelta(minutes=1):
+
+            # Debugging output
+            print(f"Event: {event_name}")
+            print(f"Description: {description}")
+            print(f"Location: {location}")
+            print(f"Raw start time: {start}")
+            print(f"Full event details: {event}")  # Print all details of the event
+
             print(f"Parsed start time: {start_time}, Current time: {datetime.datetime.now(tz.UTC)}")  # Debugging line
             zoom_link = extract_zoom_link(description) or extract_zoom_link(location)
             if zoom_link:
@@ -78,6 +88,7 @@ def check_for_events(service):
                 notification_message = f'{event_name}\n{zoom_link}'
                 os.system(f'osascript -e \'display notification "{notification_message}" with title "Event Alert"\'')
             else:
+                print("No Zoom link found.")
                 os.system(f'say \"{event_name}\"')
 
 def main():
