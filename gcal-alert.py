@@ -2,6 +2,8 @@ import datetime
 import os
 import pickle
 import sys
+from dateutil.parser import isoparse
+from dateutil import tz
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -31,7 +33,7 @@ def authenticate_google_calendar():
     return build('calendar', 'v3', credentials=creds)
 
 def check_for_events(service):
-    now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
+    now = datetime.datetime.now(tz.UTC).isoformat()  # Use timezone-aware datetime
     calendar_id = 'primary'  # Change this to the ID of the calendar you want to check
     events_result = service.events().list(calendarId=calendar_id, timeMin=now,
                                           maxResults=10, singleEvents=True,
@@ -53,17 +55,14 @@ def check_for_events(service):
             continue
 
         try:
-            if 'T' in start:
-                start_time = datetime.datetime.fromisoformat(start[:-1])
-            else:
-                start_time = datetime.datetime.fromisoformat(start)
+            start_time = isoparse(start)
         except ValueError:
             print(f"Invalid isoformat string: {start}")
             continue
 
-        print(f"Parsed start time: {start_time}, Current time: {datetime.datetime.utcnow()}")  # Debugging line
+        print(f"Parsed start time: {start_time}, Current time: {datetime.datetime.now(tz.UTC)}")  # Debugging line
 
-        if start_time <= datetime.datetime.utcnow() < start_time + datetime.timedelta(minutes=1):
+        if start_time <= datetime.datetime.now(tz.UTC) < start_time + datetime.timedelta(minutes=1):
             os.system(f'say \"{event_name}\"')
 
 def main():
