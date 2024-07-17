@@ -67,13 +67,11 @@ def check_for_events(service):
         event_name = event.get('summary', 'No Title')
         description = event.get('description', '')
         location = event.get('location', '')
-
+        conference_data = event.get('conferenceData', {})
 
         # Skip all-day events
         if 'date' in event['start']:
             continue
-
-
 
         try:
             start_time = isoparse(start)
@@ -99,8 +97,10 @@ def check_for_events(service):
                         break
             if zoom_link:
                 print(f"Zoom link: {zoom_link}")
-                notification_message = f'{event_name}\n{zoom_link}'
-                os.system(f'osascript -e \'display notification "{notification_message}" with title "Event Alert"\'')
+                notification_message = f'{event_name} Starting NOW!\n{zoom_link}'
+                os.system(f'terminal-notifier -title "Event Alert" -message "{notification_message}" -open "{zoom_link}"')
+                #os.system(f'osascript -e \'display notification "{notification_message}" with title "Event Alert"\'')
+                os.system(f'say \"{event_name} starting NOW!\"')
             else:
                 print("No Zoom link found.")
                 os.system(f'say \"{event_name}\"')
