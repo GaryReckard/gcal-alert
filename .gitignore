@@ -1,3 +1,4 @@
 .idea
 token.*
 credentials.json
+gcal-alert.log
