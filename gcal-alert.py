@@ -32,7 +32,7 @@ def authenticate_google_calendar():
 
 def check_for_events(service):
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-    calendar_id = 'gary@happycog.com'  # Change this to the ID of the calendar you want to check
+    calendar_id = 'primary'  # Change this to the ID of the calendar you want to check
     events_result = service.events().list(calendarId=calendar_id, timeMin=now,
                                           maxResults=10, singleEvents=True,
                                           orderBy='startTime').execute()
@@ -46,6 +46,12 @@ def check_for_events(service):
         start = event['start'].get('dateTime', event['start'].get('date'))
         event_name = event.get('summary', 'No Title')
         print(f"Event: {event_name}, Raw start time: {start}")  # Debugging line
+
+        # Skip all-day events
+        if 'date' in event['start']:
+            print(f"Skipping all-day event: {event_name}")
+            continue
+
         try:
             if 'T' in start:
                 start_time = datetime.datetime.fromisoformat(start[:-1])
@@ -57,12 +63,8 @@ def check_for_events(service):
 
         print(f"Parsed start time: {start_time}, Current time: {datetime.datetime.utcnow()}")  # Debugging line
 
-        if 'T' in start:
-            if start_time <= datetime.datetime.utcnow() < start_time + datetime.timedelta(minutes=1):
-                os.system(f'say \"{event_name}\"')
-        else:
-            if start_time.date() == datetime.datetime.utcnow().date():
-                os.system(f'say \"All-day event: {event_name}\"')
+        if start_time <= datetime.datetime.utcnow() < start_time + datetime.timedelta(minutes=1):
+            os.system(f'say \"{event_name}\"')
 
 def main():
     service = authenticate_google_calendar()
