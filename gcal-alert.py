@@ -34,8 +34,17 @@ def authenticate_google_calendar():
     return build('calendar', 'v3', credentials=creds)
 
 def extract_zoom_link(text):
+    # Parse HTML content using BeautifulSoup
+    soup = BeautifulSoup(text, 'html.parser')
+    # Find all links in the text
+    links = soup.find_all('a', href=True)
     # Basic pattern to match Zoom links
     zoom_pattern = r"https://[\w.-]+\.zoom\.us/[^\s]+"
+    for link in links:
+        href = link['href']
+        if re.match(zoom_pattern, href):
+            return href
+    # Fallback to plain text match
     match = re.search(zoom_pattern, text)
     if match:
         return match.group(0)
@@ -83,6 +92,11 @@ def check_for_events(service):
 
             print(f"Parsed start time: {start_time}, Current time: {datetime.datetime.now(tz.UTC)}")  # Debugging line
             zoom_link = extract_zoom_link(description) or extract_zoom_link(location)
+            if not zoom_link and 'entryPoints' in conference_data:
+                for entry_point in conference_data['entryPoints']:
+                    if entry_point['entryPointType'] == 'video':
+                        zoom_link = entry_point['uri']
+                        break
             if zoom_link:
                 print(f"Zoom link: {zoom_link}")
                 notification_message = f'{event_name}\n{zoom_link}'
