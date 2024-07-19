@@ -19,3 +19,13 @@
 - `conda env create -f environment.yml`
 - `conda activate gcal-alert`
 - `pip install -r requirements.txt`
+- Edit `run_gcal_alert.sh` to reflect correct paths
+- make the script executable if it is not: `chmod +x /path/to/your/run_gcal_alert.sh`
+- add something like `* * * * * /path/to/your/run_gcal_alert.sh` to your crontab (`crontab -e`) to run this every minute
+  - (or something like this to see logs/debug 
+  - `* * * * * /Users/gary/Dev/gcal-alert/run_gcal_alert.sh >> /Users/gary/Dev/gcal-alert/gcal-alert.log 2>&1`) 
+
+
+# Notes
+- The first time you run it, it'll have you authenticate using your happycog gmail acct
+- If you need to re-authenticate, do a `rm token.json` and re-run it
