@@ -27,5 +27,5 @@
 
 
 # Notes
-- The first time you run it, it'll have you authenticate using your happycog gmail acct
+- The first time you run it, it'll have you authenticate using your Google acct
 - If you need to re-authenticate, do a `rm token.json` and re-run it
