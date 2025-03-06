@@ -104,10 +104,10 @@ def check_for_events(service):
                 notification_message = f'{event_name} Starting NOW!\n{zoom_link}'
                 os.system(f'terminal-notifier -title "Event Alert" -message "{notification_message}" -open "{zoom_link}"')
                 #os.system(f'osascript -e \'display notification "{notification_message}" with title "Event Alert"\'')
-                os.system(f'say \"Hey you, {event_name} starting NOW! Go join that ZOOOOOOOOM!\"')
+                os.system(f'say \"Hey Gary, {event_name} starting NOW! Go join that ZOOOOOOOOM!\"')
             else:
                 print("No Zoom link found.")
-                os.system(f'say \"Hey you, {event_name} starting NOW!\"')
+                os.system(f'say \"Hey Gary, {event_name} starting NOW!\"')
 
 def main():
     service = authenticate_google_calendar()

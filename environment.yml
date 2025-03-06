@@ -44,4 +44,4 @@ dependencies:
     - soupsieve==2.5
     - uritemplate==4.1.1
     - urllib3==2.2.2
-prefix: /Users/gary/miniconda3/envs/gcal-alert
+prefix: /Users/garyreckard/Dev/miniconda3/envs/gcal-alert

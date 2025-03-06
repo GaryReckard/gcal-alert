@@ -16,6 +16,10 @@
    - rename that file to `credentials.json`
 
 # Setup
+- download and install miniconda https://www.anaconda.com/docs/getting-started/miniconda/install#macos-linux-installation
+- add conda to path
+  -  `echo 'export PATH="/Users/garyreckard/Dev/miniconda3/bin:$PATH"' >> ~/.zshrc`
+  - `source ~/.zshrc`
 - `conda env create -f environment.yml`
 - `conda activate gcal-alert`
 - `pip install -r requirements.txt`
